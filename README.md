@@ -8,6 +8,10 @@ Welcome to my GitHub profile! I’m building this space to share the projects, e
 - **Experiments** — ideas I’m exploring and lessons I’m learning
 - **A work in progress** — this profile will grow as I add more of my story
 
+## Projects
+
+- 🎭 [Random Joke Generator](joke-generator/index.html) — a lightweight browser app that fetches family-friendly jokes from [JokeAPI](https://jokeapi.dev/).
+
 ## Explore
 
 - Browse my [repositories](https://github.com/kh2469?tab=repositories)

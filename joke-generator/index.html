@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101322">
+  <title>Random Joke Generator</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #101322;
+      color: #f5f6ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 1.5rem;
+      background: radial-gradient(ellipse at top, #292451 0, #101322 55%);
+    }
+
+    main {
+      width: min(100%, 38rem);
+      padding: clamp(1.5rem, 5vw, 3rem);
+      border: 1px solid #ffffff20;
+      border-radius: 1.5rem;
+      background: #191b2dcc;
+      box-shadow: 0 1.5rem 5rem #0006;
+      text-align: center;
+    }
+
+    .emoji { font-size: 3rem; }
+    h1 { margin: 0.5rem 0; font-size: clamp(2rem, 7vw, 3rem); }
+    .intro, .attribution { color: #b7bad0; }
+    .joke {
+      min-height: 7rem;
+      margin: 2rem 0;
+      display: grid;
+      align-content: center;
+      gap: 0.8rem;
+      font-size: clamp(1.2rem, 4vw, 1.6rem);
+      line-height: 1.55;
+    }
+    .punchline { color: #c9b8ff; font-weight: 700; }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 0.9rem 1.5rem;
+      background: #9c7bff;
+      color: #171326;
+      font: inherit;
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform 150ms ease, background 150ms ease;
+    }
+    button:hover:not(:disabled) { transform: translateY(-2px); background: #b39aff; }
+    button:focus-visible { outline: 3px solid white; outline-offset: 4px; }
+    button:disabled { cursor: wait; opacity: 0.7; }
+    .attribution { margin: 1.5rem 0 0; font-size: 0.85rem; }
+    .error { color: #ffb4b4; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="emoji" aria-hidden="true">🎭</div>
+    <h1>Need a laugh?</h1>
+    <p class="intro">Press the button for a fresh, family-friendly joke.</p>
+
+    <section class="joke" aria-live="polite" aria-atomic="true" aria-label="Random joke">
+      <p id="setup">Getting a joke ready…</p>
+      <p id="punchline" class="punchline"></p>
+    </section>
+
+    <button id="joke-button" type="button">Tell me a joke</button>
+    <p id="status" class="attribution">Jokes provided by JokeAPI.</p>
+  </main>
+
+  <script>
+    const button = document.querySelector('#joke-button');
+    const setup = document.querySelector('#setup');
+    const punchline = document.querySelector('#punchline');
+    const status = document.querySelector('#status');
+
+    async function getJoke() {
+      button.disabled = true;
+      button.textContent = 'Finding a joke…';
+      setup.textContent = 'One moment…';
+      punchline.textContent = '';
+      status.classList.remove('error');
+      status.textContent = 'Fetching a fresh joke.';
+
+      try {
+        const response = await fetch('https://v2.jokeapi.dev/joke/Any?safe-mode');
+        if (!response.ok) throw new Error(`Joke service returned ${response.status}`);
+
+        const joke = await response.json();
+        if (joke.error) throw new Error('The joke service could not find a joke.');
+
+        if (joke.type === 'twopart') {
+          setup.textContent = joke.setup;
+          punchline.textContent = joke.delivery;
+        } else {
+          setup.textContent = joke.joke;
+        }
+        status.textContent = `Category: ${joke.category} · Provided by JokeAPI.`;
+      } catch (error) {
+        setup.textContent = 'Oops! The jokes are taking a break.';
+        punchline.textContent = 'Check your internet connection and try again.';
+        status.textContent = 'Could not load a joke. Please try again.';
+        status.classList.add('error');
+        console.error(error);
+      } finally {
+        button.disabled = false;
+        button.textContent = 'Tell me another';
+      }
+    }
+
+    button.addEventListener('click', getJoke);
+    getJoke();
+  </script>
+</body>
+</html>
